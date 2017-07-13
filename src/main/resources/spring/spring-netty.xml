@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+    <bean id="tcpServer" class="com.hytch.core.NettyTCPServer"
+          init-method="startServer" destroy-method="stopServer">
+        <constructor-arg ref="tcpConfig"/>
+        <constructor-arg ref="myChannelInitializer"/>
+    </bean>
+
+    <bean id="myChannelInitializer" class="com.hytch.core.MyChannelInitializer"/>
+
+    <bean id="tcpConfig" class="com.hytch.core.NettyConfig">
+        <property name="channelOptions" ref="tcpChannelOptions"/>
+        <property name="bossGroup" ref="bossGroup"/>
+        <property name="workerGroup" ref="workerGroup"/>
+        <property name="portNumber" value="10086"/>
+    </bean>
+    <!-- 用它来取代ListFactoryBean、MapFactoryBean、SetFactoryBean、PropertiesFactoryBean -->
+    <util:map id="tcpChannelOptions" map-class="java.util.HashMap">
+        <entry>
+            <key>
+                <!--
+                是否启用心跳保活机制。
+                在双方TCP套接字建立连接后（即都进入ESTABLISHED状态）并且在两个小时左右上层没有任何数据传输的情况下，
+                这套机制才会被激活-->
+                <util:constant static-field="io.netty.channel.ChannelOption.SO_KEEPALIVE"/>
+            </key>
+            <value type="java.lang.Boolean">true</value>
+        </entry>
+        <entry>
+            <key>
+                <!-- BACKLOG用于构造服务端套接字ServerSocket对象，标识当服务器请求处理线程全满时，
+                用于临时存放已完成三次握手的请求的队列的最大长度。如果未设置或所设置的值小于1，Java将使用默认值50 -->
+                <util:constant static-field="io.netty.channel.ChannelOption.SO_BACKLOG"/>
+            </key>
+            <value type="java.lang.Integer">100</value>
+        </entry>
+    </util:map>
+
+    <bean id="bossGroup" class="io.netty.channel.nio.NioEventLoopGroup" destroy-method="shutdownGracefully">
+        <constructor-arg index="0" type="int" value="2"/>
+        <constructor-arg index="1" ref="bossThreadFactory"/>
+    </bean>
+
+    <bean id="workerGroup" class="io.netty.channel.nio.NioEventLoopGroup" destroy-method="shutdownGracefully">
+        <!-- index构造参数的第一个值，type表示数据类型，value表示赋值（基本参数赋值） -->
+        <constructor-arg index="0" type="int" value="8"/>
+        <!-- index构造参数的第一个值，type表示数据类型，value表示赋值（对象） -->
+        <constructor-arg index="1" ref="workerThreadFactory"/>
+    </bean>
+
+    <bean id="bossThreadFactory" class="com.hytch.core.NamedThreadFactory">
+        <constructor-arg type="java.lang.String" value="Server-Boss"/>
+    </bean>
+
+    <bean id="workerThreadFactory" class="com.hytch.core.NamedThreadFactory">
+        <constructor-arg type="java.lang.String" index="0" value="Server-Worker"/>
+    </bean>
+</beans>

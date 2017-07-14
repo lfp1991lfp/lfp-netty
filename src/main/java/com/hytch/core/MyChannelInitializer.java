@@ -1,9 +1,10 @@
 package com.hytch.core;
 
-import com.hytch.handler.EchoClientHandler;
+import com.hytch.handler.EchoServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -31,10 +32,13 @@ public class MyChannelInitializer extends ChannelInitializer<SocketChannel> {
 		pipeline
 				.addLast("idleStateCheck",
 						new IdleStateHandler(MAX_IDLE_SECONDS, MAX_IDLE_SECONDS, MAX_IDLE_SECONDS, TimeUnit.SECONDS))
+				//DelimiterBasedFrameDecoder可以自定义换行符
+				//LineBasedFrameDecoder回车换行解码器，如果连续读取到最大长度后仍然没有发现换行符，就会抛出异常
+				//同时忽略掉之前读到的异常码流
+				//DelimiterBasedFrameDecoder可以自定义换行符使用自定义ByteBuf delimiter = Unpooled.copiedBuffer("$_".getBytes());
+				.addLast("split", new LineBasedFrameDecoder(1024))
 				.addLast(new StringEncoder(Charset.forName("UTF-8")))
 				.addLast(new StringDecoder(Charset.forName("UTF-8")))
-				.addLast(new EchoClientHandler());
-		// 使用addLast来添加自己定义的handler到pipeline中
-		// pipeline.addLast("multiplexer", createMyProtcolDecoder());
+				.addLast("multiplexer", new EchoServerHandler());
 	}
 }

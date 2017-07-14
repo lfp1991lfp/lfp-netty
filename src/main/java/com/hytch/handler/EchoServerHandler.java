@@ -4,6 +4,7 @@ import com.hytch.core.MyChannelInitializer;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
@@ -12,17 +13,17 @@ import org.slf4j.LoggerFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-
 /**
  * Created by linfp on 2017/7/13.
  * 事件捕获处理机制
  */
-public class EchoClientHandler extends ChannelInboundHandlerAdapter {
-	static final String ECHO_REQ = "Hi, Lilinfeng. Welcome to Netty.$_";
+@Sharable//注解@Sharable可以让它在channels间共享
+public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+	private static final String ECHO_REQ = "Hi, Lilinfeng. Welcome to Netty.$_";
 	private static final Logger LOG = LoggerFactory.getLogger(MyChannelInitializer.class);
 	private int counter;
 	
-	public EchoClientHandler() {
+	public EchoServerHandler() {
 	}
 	
 	/**
@@ -34,7 +35,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 	public void channelActive(ChannelHandlerContext ctx) {
 		for (int i = 0; i < 1; i++) {
 			ChannelFuture future = ctx.writeAndFlush(Unpooled.copiedBuffer(ECHO_REQ.getBytes()));   //写事件
-			future.addListener((ChannelFutureListener) channelFuture -> LOG.info("the handler写完成"));
+			future.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 		}
 	}
 	
@@ -58,6 +59,10 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		String content = (String) msg;
 		LOG.info("This is " + ++counter + " times receive server : [" + content + "]");
+		if ("close".equals(content)) {
+			ctx.writeAndFlush("同意关闭成功")
+					.addListener(ChannelFutureListener.CLOSE);
+		}
 	}
 	
 	/**
@@ -67,7 +72,8 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 	 */
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-		ctx.flush();
+//		ctx.writeAndFlush(Unpooled.EMPTY_BUFFER) //flush掉所有写回的数据
+//				.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE); //当flush完成后关闭channel
 	}
 	
 	/**

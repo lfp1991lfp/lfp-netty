@@ -53,10 +53,13 @@ public class NettyTCPServer extends AbstractNettyServer {
 			Channel serverChannel = serverBootstrap
 					.bind(nettyConfig.getSocketAddress())
 					.sync()
-					.channel();
-//			serverChannel.closeFuture().sync();
+					.channel();     //配置完成，开始绑定server，通过调用sync同步方法阻塞直到绑定成功
 			ALL_CHANNELS.add(serverChannel);
 			LOG.info("TCP server started...");
+			// 等待服务器  socket 关闭 。
+			// 在这个例子中，这不会发生，但你可以优雅地关闭你的服务器。
+			serverChannel.closeFuture().sync();
+			LOG.info("channel is closed...");
 		} catch (Exception e) {
 			LOG.error("TCP Server start error {}, going to shut down", e);
 			super.stopServer();

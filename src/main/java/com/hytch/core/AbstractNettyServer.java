@@ -47,8 +47,8 @@ public abstract class AbstractNettyServer implements NettyServer {
 	public void stopServer() throws Exception {
 		LOG.debug("In stopServer method of class: {}", this.getClass()
 				.getName());
-		ChannelGroupFuture future = ALL_CHANNELS.close();
 		try {
+			ChannelGroupFuture future = ALL_CHANNELS.close();
 			future.await();
 		} catch (InterruptedException e) {
 			LOG.error("Execption occurred while waiting for channels to close: {}", e);

@@ -15,7 +15,7 @@ import java.util.Map;
 public class NettyConfig {
 	
 	protected ChannelInitializer<? extends Channel> channelInitializer;
-	private Map<ChannelOption<?>, Object> channelOptions;
+	private Map<ChannelOption<Object>, Object> channelOptions;
 	// reactor多线程模型中的acceptor
 	private NioEventLoopGroup bossGroup;
 	// reactor多线程模型中的threadPool
@@ -27,12 +27,12 @@ public class NettyConfig {
 	private InetSocketAddress socketAddress;
 	private int portNumber = 18090;
 	
-	public Map<ChannelOption<?>, Object> getChannelOptions() {
+	public Map<ChannelOption<Object>, Object> getChannelOptions() {
 		return channelOptions;
 	}
 	
 	public void setChannelOptions(
-			Map<ChannelOption<?>, Object> channelOptions) {
+			Map<ChannelOption<Object>, Object> channelOptions) {
 		this.channelOptions = channelOptions;
 	}
 	

@@ -1,5 +1,7 @@
-package com.hytch.core;
+package com.hytch.core1;
 
+import com.hytch.core.AbstractNettyServer;
+import com.hytch.core.NettyConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -7,10 +9,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,13 +17,13 @@ import java.util.Set;
  * Created by linfp on 2017/7/12.
  * netty服务端
  */
-public class NettyTCPServer extends AbstractNettyServer {
-	private static final Logger LOG = LoggerFactory.getLogger(NettyTCPServer.class);
+public class NettyTCPServer1 extends AbstractNettyServer {
+	private static final Logger LOG = LoggerFactory.getLogger(NettyTCPServer1.class);
 	
 	private ServerBootstrap serverBootstrap;
 	
-	public NettyTCPServer(NettyConfig nettyConfig,
-	                      ChannelInitializer<? extends Channel> channelInitializer) {
+	public NettyTCPServer1(NettyConfig nettyConfig,
+	                       ChannelInitializer<? extends Channel> channelInitializer) {
 		super(nettyConfig, channelInitializer);
 	}
 	
@@ -65,7 +63,6 @@ public class NettyTCPServer extends AbstractNettyServer {
 			// 等待服务器  socket 关闭 。
 			// 在这个例子中，这不会发生，但你可以优雅地关闭你的服务器。
 //			serverChannel.closeFuture().sync();
-			LOG.info("channel is closed...");
 		} catch (Exception e) {
 			LOG.error("TCP Server start error {}, going to shut down", e);
 			super.stopServer();
